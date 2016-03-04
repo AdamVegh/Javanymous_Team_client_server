@@ -1,7 +1,6 @@
 package mp3_joiner;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 // This class should create mp3 file object list and then join them to one object. 

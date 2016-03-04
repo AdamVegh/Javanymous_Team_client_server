@@ -1,4 +1,4 @@
-package commonenums;
+package sotrerpropertiesenum;
 
 public enum Properties
 {

@@ -2,10 +2,10 @@ package mp3_joiner;
 
 import java.util.Scanner;
 import java.io.File;
-import java.io.IOException;
 
 public class MP3JoinerUI {
 	
+	@SuppressWarnings("resource")
 	public File mp3JoinerGetInputFromUser()
 	{
 		Scanner consoleScanner = new Scanner(System.in);
