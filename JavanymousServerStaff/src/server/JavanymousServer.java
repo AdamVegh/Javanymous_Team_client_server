@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,29 +40,27 @@ public class JavanymousServer
 				Object objectFromInput = null;
 
 				boolean serverRunning = true;
-				while (serverRunning) {
-					
+				while (serverRunning) 
+				{	
 					// reading the command from the client
 					try {
-						System.out.println("Waiting for command.");
+						System.out.println("Waiting for command...");
 						objectFromInput = ois.readObject();
-						System.out.println("Command arrived. " + objectFromInput);
+						System.out.println("Command: " + objectFromInput);
 					} catch (java.net.SocketException e) {
 						e.printStackTrace();
-						System.out.println("Client ShutDown.");
-						break;}
-					
+						System.out.println("Client ShutDown..");
+						break;
+						}
 					if (objectFromInput == Command.JOIN)
 					{
-						System.out.println("eljut");
 						// getting the file list from the client (what m3u contained)
 						List< File > listFiles = (List< File >) ois.readObject();
+						
 						List<Long> fileSize = (List<Long>)ois.readObject();
-						System.out.println(listFiles);
 						List< File > serverFiles = new ArrayList< File >();
 						// getting the mp3 content and saving them on the server side
 						String saveDir = dirCreation();
-						System.out.println("1");
 						for (int i = 0; i < listFiles.size(); i++)
 						{
 							File file = listFiles.get(i);
@@ -69,35 +68,38 @@ public class JavanymousServer
 							serverFiles.add(destination);
 							saveFile(clientSocket, destination, fileSize.get(i));
 						}
-						
+						System.out.println("All files recevied...");
 						// joining the new file
 						File finalFile = new File(saveDir + "//newJoined.mp3");
+						System.out.println("Mp3 joining...");
 						MP3Joiner.joinFiles(serverFiles, finalFile);
-						
 						// sending back the joined mp3 file
+						System.out.println("Send file size...");
 						oos.writeObject(finalFile.length());
+						System.out.println("Send file back to client...");
 						sendFile(finalFile, clientSocket);
 						oos.flush();
 						continue;
 					}
 					
-					else if (objectFromInput.equals(Command.SORT))
+					else if (objectFromInput == Command.SORT)
 					{
-						// TODO
+						//TODO
 					}
-					else if (objectFromInput.equals(Command.EXIT))
+					else if (objectFromInput == Command.EXIT)
 					{
 						// exit from the server.
 						System.out.println("SERVER SHUTDOWN!");
 						clientSocket.close();
 						serverSocket.close();
 						serverRunning = false;
-						
 					}
-				}
-					
+				}	
 			}
-			
+			catch(SocketException e)
+			{
+				System.err.println(e.getMessage());
+			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
@@ -111,12 +113,11 @@ public class JavanymousServer
 	{
 		DataInputStream dis = new DataInputStream(clientSock.getInputStream());
 		FileOutputStream fos = new FileOutputStream(file);
-		byte [ ] buffer = new byte [ 4096 ];
+		byte [ ] buffer = new byte [4096];
 
 		int read = 0;
 		int totalRead = 0;
 		long remaining = fileSize;
-		System.out.println(remaining);
 		double percentage;
 		while ((read = dis.read(buffer, 0, Math.min(buffer.length, (int) remaining))) > 0){
 			totalRead += read;
