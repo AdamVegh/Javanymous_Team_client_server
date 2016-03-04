@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -43,11 +44,16 @@ public class JavanymousClient
 					String m3uFileLocation = getM3ULocationFromUser();
 					File m3uFile = new File(m3uFileLocation);
 					List<File> fileObjList = M3UHandler.getMP3FileListFromM3U(m3uFile);
-					
 					// sending the server the file list to join them
 					oos.writeObject(fileObjList);
 					oos.flush();
+					List <Long> fileSizes = new ArrayList<>();
 					System.out.println("File list Sent.");
+					for (File file : fileObjList) {
+						fileSizes.add(file.length());
+					}
+					oos.writeObject(fileSizes);
+					oos.flush();
 					
 					// sending the content of the mp3 files
 					for (File file : fileObjList) {
@@ -62,7 +68,8 @@ public class JavanymousClient
 					File saveFile = new File(joinedDir + "//joined.mp3");
 					saveFile(clientSocket, saveFile, fileSize);
 					System.out.println("Joined file saved.");
-					continue;
+					oos.writeObject(Command.EXIT);
+					command = Command.EXIT;
 				}
 				else if (command == Command.SORT)
 				{
@@ -84,12 +91,10 @@ public class JavanymousClient
 		}
 		catch (ConnectException e){
 			System.out.println("Server probably not running dumbass :D.");
-			e.printStackTrace();
 			System.exit(1);
 			
 		} 
 		catch (Exception e) {
-			e.printStackTrace();
 			System.exit(1);
 		}
 	}
@@ -153,7 +158,7 @@ public class JavanymousClient
 	
 	public static void main(String [ ] args)
 	{
-		new JavanymousClient("192.168.150.45",10022, Command.JOIN);
+		new JavanymousClient("192.168.150.69",10022,Command.JOIN);
 	}
 	
 	

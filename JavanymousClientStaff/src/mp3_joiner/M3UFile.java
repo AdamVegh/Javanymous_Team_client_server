@@ -44,9 +44,6 @@ public class M3UFile {
 
 	// m3u file-checker used by constructor:
 	public static boolean checkIfValidM3U(File m3uFile) {
-		System.out.println(m3uFile.getName());
-		System.out.println(m3uFile.isFile());
-		System.out.println(m3uFile.exists());
 		return m3uFile.isFile() && m3uFile.getName().toLowerCase().endsWith(".m3u");
 	}
 
