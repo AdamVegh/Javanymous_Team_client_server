@@ -20,7 +20,7 @@ import mp3_joiner.*;
 
 public class JavanymousClient
 {
-	public JavanymousClient (String host,int port)
+	public JavanymousClient (String host,int port,Command command)
 	{
 		
 		Socket clientSocket = null;
@@ -33,51 +33,48 @@ public class JavanymousClient
 			ois = new ObjectInputStream(clientSocket.getInputStream());
 			boolean running = true;
 			while (running) {
-				System.out.println("1.JOIN, 2.SORT, 3.EXIT \n");
-				@SuppressWarnings("resource")
-				Scanner in = new Scanner(System.in);
-				String input = in.nextLine();
-				switch (input) {
-					case "1": 
-						
-						oos.writeObject(Command.JOIN);
-						oos.flush();
-						System.out.println("Join command Sent.");
-						
-						// making a file list from an m3u file
-						String m3uFileLocation = getM3ULocationFromUser();
-						File m3uFile = new File(m3uFileLocation);
-						List<File> fileObjList = M3UHandler.getMP3FileListFromM3U(m3uFile);
-						
-						// sending the server the file list to join them
-						oos.writeObject(fileObjList);
-						oos.flush();
-						System.out.println("File list Sent.");
-						
-						// sending the content of the mp3 files
-						for (File file : fileObjList) {
-							sendFile(file, clientSocket);
-							System.out.println("Mp3 sent.");
-						}
-						
-						// getting the joined mp3 file from the server
-						long fileSize = (long) ois.readObject();
-						String joinedDir = dirCreation();
-						
-						File saveFile = new File(joinedDir + "//joined.mp3");
-						saveFile(clientSocket, saveFile, fileSize);
-						System.out.println("Joined file saved.");
-						break;
-							
-					case "2":
-						oos.writeObject(Command.SORT);
-						//TODO
-						
-					case "3":
-						System.out.println("Exit command sent.");
-						oos.writeObject(Command.EXIT);
-						oos.flush();
-						running = false;
+				if(command == Command.JOIN)
+				{
+					oos.writeObject(Command.JOIN);
+					oos.flush();
+					System.out.println("Join command Sent.");
+					
+					// making a file list from an m3u file
+					String m3uFileLocation = getM3ULocationFromUser();
+					File m3uFile = new File(m3uFileLocation);
+					List<File> fileObjList = M3UHandler.getMP3FileListFromM3U(m3uFile);
+					
+					// sending the server the file list to join them
+					oos.writeObject(fileObjList);
+					oos.flush();
+					System.out.println("File list Sent.");
+					
+					// sending the content of the mp3 files
+					for (File file : fileObjList) {
+						sendFile(file, clientSocket);
+						System.out.println("Mp3 sent.");
+					}
+					
+					// getting the joined mp3 file from the server
+					long fileSize = (long) ois.readObject();
+					String joinedDir = dirCreation();
+					
+					File saveFile = new File(joinedDir + "//joined.mp3");
+					saveFile(clientSocket, saveFile, fileSize);
+					System.out.println("Joined file saved.");
+					continue;
+				}
+				else if (command == Command.SORT)
+				{
+					oos.writeObject(Command.SORT);
+					//TODO
+				}
+				else if (command == Command.EXIT)
+				{
+					System.out.println("Exit command sent.");
+					oos.writeObject(Command.EXIT);
+					oos.flush();
+					running = false;
 				}
 			}
 			ois.close();
@@ -156,7 +153,7 @@ public class JavanymousClient
 	
 	public static void main(String [ ] args)
 	{
-		new JavanymousClient("192.168.150.45",10022);
+		new JavanymousClient("192.168.150.45",10022, Command.JOIN);
 	}
 	
 	
